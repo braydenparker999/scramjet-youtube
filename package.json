@@ -1,0 +1,14 @@
+{
+  "name": "mobile-scramjet",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "wisp-server-node": "^1.1.1",
+    "@mercuryworkshop/scramjet": "latest",
+    "@mercuryworkshop/bare-mux": "latest",
+    "@mercuryworkshop/epoxy-tls": "latest"
+  }
+}
