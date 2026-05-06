@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scramjet Proxy</title>
+    <style>
+        body { background: #0f0f0f; color: white; font-family: sans-serif; text-align: center; padding: 50px 20px; }
+        input { padding: 15px; border-radius: 25px; border: none; width: 80%; max-width: 400px; margin-bottom: 20px; outline: none; }
+        button { padding: 15px 30px; background: #ff0000; color: white; border: none; border-radius: 25px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Scramjet YouTube Access</h1>
+    <p id="status">Loading proxy engine...</p>
+    
+    <input type="text" id="url" value="https://www.youtube.com" placeholder="Enter URL">
+    <br>
+    <button onclick="go()">Unblock YouTube</button>
+
+    <script type="module">
+        import { BareMuxConnection } from '/baremux/index.mjs';
+
+        // Initialize proxy connection
+        async function init() {
+            try {
+                const connection = new BareMuxConnection('/baremux/worker.js');
+                const wispUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/wisp/';
+                await connection.setTransport('/epoxy/index.mjs', [{ wisp: wispUrl }]);
+                
+                if ('serviceWorker' in navigator) {
+                    await navigator.serviceWorker.register('/sw.js', { scope: '/scram/' });
+                    document.getElementById('status').innerText = "Ready! Tap to unblock.";
+                }
+            } catch (err) {
+                document.getElementById('status').innerText = "Error loading proxy.";
+            }
+        }
+        init();
+
+        // XOR Encoding to hide the URL from school/work Wi-Fi
+        function encodeXor(str) {
+            return encodeURIComponent(str.split('').map((char, ind) => 
+                ind % 2 ? String.fromCharCode(char.charCodeAt(0) ^ 2) : char
+            ).join(''));
+        }
+
+        window.go = function() {
+            let url = document.getElementById('url').value.trim();
+            if (!url.startsWith('http')) url = 'https://' + url;
+            // Redirect through Scramjet
+            window.location.href = __uv$config.prefix + encodeXor(url); // Ensure UV config matches scramjet if using legacy, otherwise use direct:
+            window.location.href = '/scram/' + encodeXor(url);
+        }
+    </script>
+</body>
+</html>
